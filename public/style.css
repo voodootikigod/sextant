@@ -1,0 +1,11 @@
+body { background: #303030; padding:0px; margin:0px; text-align:center; }
+#container { width: 600px; background: #FFF; border-right: 1px solid #414141; padding: 20px; height: 100%; text-align: center; margin: 0px auto;}
+
+h1 {
+	font-family: Arial;
+}
+
+#arewefirstyet {
+	width: 600px;
+	height: 400px;
+}
