@@ -1,9 +1,18 @@
 var sys = require("sys");
+var connect = require("connect");
+var express = require("express");
 var fs = require("fs");
 var http = require("http");
-var couchdb = require("couchdb").createClient(5984, "localhost");
-var db = couchdb.db("arewefirstyet");
+var config = require("config").config;
+var couchdb = require("couchdb").createClient(config.port, config.host);
+var db = couchdb.db(config.db);
 
+var pub = __dirname + '/public';
+var app = express.createServer(
+    express.staticProvider(pub)
+);
+
+app.set('views', __dirname + '/views');
 
 
 var target_queries = [
@@ -61,30 +70,39 @@ function post_results(target, rankings) {
     });
 }
 
-for (var idx in target_queries) {
-    var target = target_queries[idx];
-    var results = [];
-    var page_count = 0;
-    var completed = 0;
-    for (page_count = 0; page_count < MAX_PAGES; page_count++) {
-        var cb = (function (t, pc) {
-            return function(urls) {
-                results[pc] =  urls;
-                completed += 1;
-                if (completed == MAX_PAGES) {
-                    
-                    post_results(t, results.reduce(function(a,b) {
-                        return a.concat(b) 
-                    }, []));
-                }
-            };
-        })(target, page_count);
-	var tu = target_url.replace("{QUERY}", target.query).replace("{PAGE}", ""+(page_count*4));
-        get_page_results(tu, page_count, cb);
 
+function query_placement() {
+    for (var idx in target_queries) {
+        var target = target_queries[idx];
+        var results = [];
+        var page_count = 0;
+        var completed = 0;
+        for (page_count = 0; page_count < MAX_PAGES; page_count++) {
+            var cb = (function (t, pc) {
+                return function(urls) {
+                    results[pc] =  urls;
+                    completed += 1;
+                    if (completed == MAX_PAGES) {
+                        
+                        post_results(t, results.reduce(function(a,b) {
+                            return a.concat(b) 
+                        }, []));
+                    }
+                };
+            })(target, page_count);
+	    var tu = target_url.replace("{QUERY}", target.query).replace("{PAGE}", ""+(page_count*4));
+            get_page_results(tu, page_count, cb);
+            
+        }
     }
+}    
 
-    
-}
-    
 
+
+app.get("/seek", function(req, res) {
+    query_placement();
+    res.render("seek.ejs");
+});
+
+
+app.listen(80);
