@@ -10,12 +10,6 @@ var target_queries = [
     {name: "Learn JavaScript", query: "Learn%20JavaScript", target: "developer.mozilla.org"}
 ];
 var target_url = "/ajax/services/search/web?v=1.0&q={QUERY}&start={PAGE}"
-
-
-var link_regex =  /(<h3.*?\/h3>)/g;
-var href_regex = /href=(.*)[^ ]/g;
-var strip_tags_regex = /<(?:.|\s)*?>/g;
-
 var MAX_PAGES = 10;
 
 var get_page_results = function (target_url, page, callback) {
@@ -34,8 +28,12 @@ var get_page_results = function (target_url, page, callback) {
         });
         response.on("end", function() { 
             var data = JSON.parse(body);
+
+
+
             var urls = [];
             var juicybits = data.responseData.results;
+            
             for (var bitcount in juicybits) {
                 var bit = juicybits[bitcount];
                 urls.push({url: bit.url, name: bit.titleNoFormatting})
@@ -51,9 +49,9 @@ function post_results(target, rankings) {
     var nao = (new Date());
     
     var timestamp = ""+nao.getFullYear()+pad(nao.getUTCMonth())+pad(nao.getUTCDate())
-    var placement = -1;
+    var placement = 100;
     for (var idx =0; idx < rankings.length; idx++) {
-        if (rankings[idx].url.indexOf(target.target) >= 0 && placement < 0) {
+        if (rankings[idx].url.indexOf(target.target) >= 0 && placement > idx) {
             placement = idx;
         }
     }
@@ -69,19 +67,21 @@ for (var idx in target_queries) {
     var page_count = 0;
     var completed = 0;
     for (page_count = 0; page_count < MAX_PAGES; page_count++) {
-        var cb = (function (target, pc) {
+        var cb = (function (t, pc) {
             return function(urls) {
                 results[pc] =  urls;
                 completed += 1;
                 if (completed == MAX_PAGES) {
                     
-                    post_results(target, results.reduce(function(a,b) {
+                    post_results(t, results.reduce(function(a,b) {
                         return a.concat(b) 
                     }, []));
                 }
             };
-        });
-        get_page_results(target_url.replace("{QUERY}", target.query).replace("{PAGE}", ""+page_count), page_count, cb(target, page_count));
+        })(target, page_count);
+	var tu = target_url.replace("{QUERY}", target.query).replace("{PAGE}", ""+(page_count*4));
+        get_page_results(tu, page_count, cb);
+
     }
 
     
