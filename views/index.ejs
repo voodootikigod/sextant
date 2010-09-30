@@ -1,0 +1,34 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+  <meta charset="utf-8"> 
+ 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+  <title>Are we first yet?</title> 
+  <link rel="stylesheet" href="style.css"> 
+  <link rel="shortcut icon" href="/favicon.png"> 
+</head> 
+<body> 
+<div id="container"> 
+  <div id="arewefirstyet"></div> 
+  <h1>No</h1> 
+  <a href='https://developer.mozilla.org/en/JavaScript' title='JavaScript Reference, JavaScript Guide, JavaScript API, JS API, JS Guide, JS Reference, Learn JS, JS Documentation'><img src='http://static.jsconf.us/promotejsvs.png' height='280' width='160' alt='JavaScript Reference, JavaScript Guide, JavaScript API, JS API, JS Guide, JS Reference, Learn JS, JS Documentation'/></a> 
+  
+</div> 
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> 
+<script src="./ext/flot/jquery.flot.js"></script> 
+<script> 
+ 
+function getDate(days) {
+  return (new Date()).getTime() - days * 3600 * 24 * 1000;
+}
+ 
+var series = <%- data %>;
+ 
+ 
+$(function () {
+  $.plot($("#arewefirstyet"), series, {});
+});
+</script> 
+</body> 
+</html>
