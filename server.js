@@ -3,9 +3,12 @@ var connect = require("connect");
 var express = require("express");
 var fs = require("fs");
 var http = require("http");
-var config = require("./config").config;
-var couchdb = require("couchdb").createClient(config.port, config.host);
-var db = couchdb.db(config.db);
+if (process.env.COUCHDB_USER) {
+  var couchdb = require("couchdb").createClient(process.env.COUCHDB_PORT || 5984, process.env.COUCHDB_HOST || "localhost", process.env.COUCHDB_USER, process.env.COUCHDB_PASSWORD);
+} else {
+  var couchdb = require("couchdb").createClient(process.env.COUCHDB_PORT || 5984, process.env.COUCHDB_HOST || "localhost");
+}
+var db = couchdb.db("arewefastyet");
 
 var pub = __dirname + '/public';
 var app = express.createServer(
