@@ -24,10 +24,21 @@ function getDate(days) {
 }
  
 var series = <%- data %>;
- 
+var options = {
+       series: {
+           lines: { show: true },
+           points: { show: true }
+       },
+       legend: { noColumns: 2 },
+       xaxis: { 
+         mode: "time", 
+         timeformat: "%y/%m/%d",
+         minTickSize: [1, "day"]
+       }
+   };
  
 $(function () {
-  $.plot($("#arewefirstyet"), series, {});
+  $.plot($("#arewefirstyet"), series, options);
 });
 </script> 
 </body> 

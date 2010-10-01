@@ -87,38 +87,43 @@ function reset_active_series() {
   resetting = true;
   active_series.length = 0;  
   db.view("ordering", "byid", {}, function (err, r) {
-    
-    var current_target_count = 0;
-    var previous_target = null;
-    var curry_data = [];
-    var curry_label = "";
-    r.rows.forEach(function (elem, idx) {
-      var current = elem.value
-      if (current._id.split(":")[0] != previous_target) {
-        if (previous_target) {
-          active_series.push({
-            label: curry_label,
-            data: JSON.parse(JSON.stringify(curry_data))
-          })
+    if (err) { 
+      sys.puts(err);
+      resetting = false;
+    } else {
+      var current_target_count = 0;
+      var previous_target = null;
+      var curry_data = [];
+      var curry_label = "";
+      r.rows.forEach(function (elem, idx) {
+        var current = elem.value
+        if (current._id.split(":")[0] != previous_target) {
+          if (previous_target) {
+            active_series.push({
+              label: curry_label,
+              data: JSON.parse(JSON.stringify(curry_data))
+            })
+          }
+          current_target_count = 0;
+          curry_data.length = 0;
+          previous_target = current._id.split(":")[0];
+          curry_label = current.target;
         }
-        current_target_count = 0;
-        curry_data.length = 0;
-        previous_target = current._id.split(":")[0];
-        curry_label = current.target;
-      }
-      if (current_target_count < 20) {
-        curry_data.push([current_target_count, current.placement]);
-        current_target_count += 1;
-      }
-    });
+        if (current_target_count < 20) {
+          var d = (new Date(Date.UTC(parseInt(current.date.slice(0,4), 10), parseInt(current.date.slice(4,6), 10), parseInt(current.date.slice(6,8), 10), 0, 0, 0, 0))).getTime();
+          curry_data.push([d, current.placement]);
+          current_target_count += 1;
+        }
+      });
     
-    if (previous_target) {
-      active_series.push({
-        label: curry_label,
-        data: curry_data
-      })
+      if (previous_target) {
+        active_series.push({
+          label: curry_label,
+          data: curry_data
+        })
+      }
+      resetting = false;
     }
-    resetting = false;
   })
 }
 
@@ -163,7 +168,8 @@ app.get("/seek", function(req, res) {
 
 app.get("/", function (req, res) {
   res.render("index.ejs", { locals: {
-    data: JSON.stringify(active_series)
+    data: JSON.stringify(active_series),
+    ticks: active_series[0].data.length
   }});
 })
 
