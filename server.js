@@ -99,6 +99,7 @@ function reset_active_series() {
   db.view("ordering", "byid", {}, function (err, r) {
     if (err) { 
       for (var e in err) { sys.puts(""+e+": "+err[e]) }
+      sys.puts(r);
       resetting = false;
     } else {
       var current_target_count = 0;
