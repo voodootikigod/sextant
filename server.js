@@ -8,7 +8,7 @@ if (process.env.COUCHDB_USER) {
 } else {
   var couchdb = require("couchdb").createClient(process.env.COUCHDB_PORT || 5984, process.env.COUCHDB_HOST || "localhost");
 }
-var db = couchdb.db("arewefastyet");
+var db = couchdb.db("arewefirstyet");
 
 var pub = __dirname + '/public';
 var app = express.createServer(
@@ -91,7 +91,7 @@ function reset_active_series() {
   active_series.length = 0;  
   db.view("ordering", "byid", {}, function (err, r) {
     if (err) { 
-      sys.puts(err);
+      for (var e in err) { sys.puts(""+e+": "+err[e]) }
       resetting = false;
     } else {
       var current_target_count = 0;

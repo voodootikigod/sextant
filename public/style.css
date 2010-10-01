@@ -1,11 +1,8 @@
-body { background: #303030; padding:0px; margin:0px; text-align:center; }
+body { background: #303030; padding:0px; margin:0px; text-align:center; font-family: Arial;}
 #container { width: 600px; background: #FFF; border-right: 1px solid #414141; padding: 20px; height: 100%; text-align: center; margin: 0px auto;}
-
-h1 {
-	font-family: Arial;
-}
-
+footer { text-align: left; border-top: 1px solid #414141; margin-top: 20px;padding-top: 10px; font-size:11px;}
 #arewefirstyet {
 	width: 600px;
 	height: 400px;
 }
+a, a:visited, a:link { color: #B81912; font-weight: bold;}
