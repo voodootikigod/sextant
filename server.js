@@ -171,6 +171,7 @@ reset_active_series();
 
 app.get("/reset", function (req, res) {
   reset_active_series();
+  res.send("OK");
 })
 
 app.get("/seek", function(req, res) {
