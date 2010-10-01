@@ -3,10 +3,17 @@ var connect = require("connect");
 var express = require("express");
 var fs = require("fs");
 var http = require("http");
-if (process.env.COUCHDB_USER) {
-  var couchdb = require("couchdb").createClient(process.env.COUCHDB_PORT || 5984, process.env.COUCHDB_HOST || "localhost", process.env.COUCHDB_USER, process.env.COUCHDB_PASSWORD);
+
+cport = process.env.COUCHDB_PORT || 5984;
+chost = process.env.COUCHDB_HOST || "localhost";
+cuser = process.env.COUCHDB_USER;
+cpass = process.env.COUCHDB_PASSWORD;
+sys.puts("Connecting to "+cuser+"|"+cpass+"|"+chost+"|"+cport);
+
+if (cuser) {
+  var couchdb = require("couchdb").createClient(cport, chost, cuser, cpass);
 } else {
-  var couchdb = require("couchdb").createClient(process.env.COUCHDB_PORT || 5984, process.env.COUCHDB_HOST || "localhost");
+  var couchdb = require("couchdb").createClient(cport, chost);
 }
 var db = couchdb.db("arewefirstyet");
 
