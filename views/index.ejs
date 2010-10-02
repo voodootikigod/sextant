@@ -13,11 +13,14 @@
   <h1>Are We First Yet?</h1>
   <div id="arewefirstyet"></div> 
   <h2><%= first %></h2> 
+  <table>
+    <% for (var idx in current_rankings) { %>
+      <tr><th><%= idx %></th><td><%= current_rankings[idx] %></td></tr>
+    <% } %>
   <a href='http://promotejs.com/' title='Promote JS! A Worldwide Call for Improving JS Documentation Visibility'><img src='http://static.jsconf.us/promotejsvs.png' height='280' width='160' alt='Promote JS!'/></a> 
 
 <footer>
-	<p>Want to track your own items for page rank? <a href='http://github.com/voodootikigod/arewefirstyet'>Check out the code on GitHub</a></p>
-    <p>Created by the <a href="http://jsconf.us">Pirates of JSConf</a>.</p>
+  <p>Created by the <a href="http://jsconf.us">Pirates of JSConf</a>.</p>
 </footer>
 </div> 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> 

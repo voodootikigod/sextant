@@ -128,7 +128,7 @@ function reset_active_series() {
       });
     
       if (previous_target) {
-        if (curry_data[curry_data.length-1] == 0) { is_first += 1; }
+        if (curry_data[curry_data.length-1][1] == 0) { is_first += 1; }
         active_series.push({
           label: curry_label,
           data: curry_data
@@ -151,9 +151,6 @@ function query_placement() {
             if (err) { throw new Error(JSON.stringify(err)) }
         });
         idx += 1;
-        if (idx == target_queries.length)  {
-          reset_active_series();
-        }
       });
     })(target);
     seek(target_url.replace("{QUERY}", target.query), 0, function(val) {
@@ -181,9 +178,15 @@ app.get("/seek", function(req, res) {
 app.get("/", function (req, res) {
   var f = (is_first > (active_series.length/2) ? "Yes" : "No");
   f += " ("+is_first+")"
+  var current_rankings = [];
+  for (var idx in active_series)   {
+    rankings = active_series[idx].data;
+    current_rankings.push({ name: active_series[idx].label, ranking: rankings[rankings.length-1][1] });
+  }
   res.render("index.ejs", { locals: {
     data: JSON.stringify(active_series),
-    first: f
+    first: f,
+    rankings: current_rankings
   }});
 })
 
