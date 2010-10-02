@@ -181,7 +181,7 @@ app.get("/", function (req, res) {
   var current_rankings = [];
   for (var idx in active_series)   {
     rankings = active_series[idx].data;
-    current_rankings.push({ name: active_series[idx].label, ranking: rankings[rankings.length-1][1] });
+    current_rankings.push({ label: active_series[idx].label, ranking: rankings[rankings.length-1][1] });
   }
   res.render("index.ejs", { locals: {
     data: JSON.stringify(active_series),

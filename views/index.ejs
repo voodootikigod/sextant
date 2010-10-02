@@ -2,10 +2,21 @@
 <html lang="en"> 
 <head> 
   <meta charset="utf-8"> 
- 
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
   <title>Are we first yet?</title> 
-  <link rel="stylesheet" href="/style.css"> 
+  <style type="text/css">
+  body { background: #303030; padding:0px; margin:0px; text-align:center; font-family: Arial;}
+  #container { width: 600px; background: #FFF; border-right: 1px solid #414141; padding: 20px; height: 100%; text-align: center; margin: 0px auto;}
+  footer { text-align: left; border-top: 1px solid #414141; margin-top: 20px;padding-top: 10px; font-size:11px;}
+  #arewefirstyet { width: 600px; height: 400px; }
+  a, a:visited, a:link { color: #B81912; font-weight: bold;}
+  th { text-align: left;}
+  #copout table { margin: 0px auto;}
+  #copout table td, #copout table th { border-bottom: 1px solid #333; font-size: 0.9em; width: auto}
+  #copout table td { width: 40px;}
+  #copout td { text-align: center; vertical-align:middle; width: 50%}
+  #copout { width: 100%; border-collapse:collapse}
+  </style>
   <link rel="shortcut icon" href="/favicon.png"> 
 </head> 
 <body> 
@@ -13,12 +24,15 @@
   <h1>Are We First Yet?</h1>
   <div id="arewefirstyet"></div> 
   <h2><%= first %></h2> 
-  <table>
-    <% for (var idx in current_rankings) { %>
-      <tr><th><%= idx %></th><td><%= current_rankings[idx] %></td></tr>
+  <table id='copout'>
+  <tr>
+    <td><a href='http://promotejs.com/' title='Promote JS! A Worldwide Call for Improving JS Documentation Visibility'><img src='http://static.jsconf.us/promotejsvs.png' height='280' width='160' alt='Promote JS!'/></a></td>
+  <td><table>
+    <% for (var idx in rankings) { %>
+      <tr><th><%= rankings[idx].label %></th><td><%= rankings[idx].ranking+1 %></td></tr>
     <% } %>
-  <a href='http://promotejs.com/' title='Promote JS! A Worldwide Call for Improving JS Documentation Visibility'><img src='http://static.jsconf.us/promotejsvs.png' height='280' width='160' alt='Promote JS!'/></a> 
-
+    </table>
+  </td></tr></table>
 <footer>
   <p>Created by the <a href="http://jsconf.us">Pirates of JSConf</a>.</p>
 </footer>
