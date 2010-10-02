@@ -46,7 +46,7 @@ var resetting = false;
 var target_url = "/ajax/services/search/web?v=1.0&q={QUERY}&start={PAGE}"
 var MAX_PAGES = 10;
 var MAX_SPIN = 50;
-function seek (target_url, page, is_found, urls, callback) {
+function seek (target_url, page, is_found, callback) {
     var paged_target_url = target_url.replace("{PAGE}", page);
     var google = http.createClient(80, "ajax.googleapis.com");
     var request = google.request('GET', 
@@ -69,19 +69,19 @@ function seek (target_url, page, is_found, urls, callback) {
               juicybits.forEach(function(bit, bitcount) {
                 if (is_found(bit.url)) {
                   found_index = page*4 + bitcount;
-                  urls.push({url: bit.url, name: bit.titleNoFormatting})
+                  // urls.push({url: bit.url, name: bit.titleNoFormatting})
                 }
                 if (found_index == -1) {
-                  urls.push({url: bit.url, name: bit.titleNoFormatting})
+                  // urls.push({url: bit.url, name: bit.titleNoFormatting})
                 }
               });
             
               if (page == MAX_SPIN) {
-                callback(MAX_SPIN*4, urls);
+                callback(MAX_SPIN*4);
               } else if (found_index >= 0)
-                callback(found_index+1, urls);
+                callback(found_index+1);
               else {
-                seek(target_url, page+1, is_found, urls, callback);
+                seek(target_url, page+1, is_found, callback);
               }
             } else {
               sys.p("Failure on "+paged_target_url);
@@ -143,12 +143,11 @@ function query_placement() {
   var nao = (new Date());
   var idx = 0;
   target_queries.forEach(function(target, idx) {
-    var results = [];
    
     var callback = (function (t) {
-      return (function (found_index, urls) {
+      return (function (found_index) {
         var timestamp = ""+nao.getFullYear()+pad(nao.getUTCMonth())+pad(nao.getUTCDate());
-        db.saveDoc(keyify(t)+":"+timestamp, {"target": t.name, "query": t.query, "date": timestamp, "placement": found_index, "rankings": urls}, function (err, doc) {
+        db.saveDoc(keyify(t)+":"+timestamp, {"target": t.name, "query": t.query, "date": timestamp, "placement": found_index}, function (err, doc) {
             if (err) { throw new Error(JSON.stringify(err)) }
         });
         idx += 1;
@@ -159,7 +158,7 @@ function query_placement() {
     })(target);
     seek(target_url.replace("{QUERY}", target.query), 0, function(val) {
       return (val.indexOf(target.target) >= 0);
-    }, [], callback);
+    }, callback);
   });
 }    
 
