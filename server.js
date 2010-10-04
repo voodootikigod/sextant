@@ -26,23 +26,33 @@ app.set('views', __dirname + '/views');
 
 
 var target_queries = [
-    {name: "JavaScript", query: "JavaScript", target: "developer.mozilla.org"},
-    {name: "JS", query: "JS", target: "developer.mozilla.org"},
-    {name: "Learn JavaScript", query: "Learn%20JavaScript", target: "developer.mozilla.org"},
-    {name: "JS Reference", query: "JS%20Reference", target: "developer.mozilla.org"},
-    {name: "Learn JS", query: "Learn%20JS", target: "developer.mozilla.org"},
-    {name: "JS Array", query: "JS%20Array", target: "developer.mozilla.org"},
-    {name: "JS String", query: "JS%20String", target: "developer.mozilla.org"},
-    {name: "JS Number", query: "JS%20Number", target: "developer.mozilla.org"},
-    {name: "JS RegExp", query: "JS%20RegExp", target: "developer.mozilla.org"},
-    {name: "JS Function", query: "JS%20Function", target: "developer.mozilla.org"},
-    {name: "JS Tutorial", query: "JS%20Tutorial", target: "developer.mozilla.org"},
-    {name: "JS Documentation", query: "JS%20Documentation", target: "developer.mozilla.org"}
+    {name: "JavaScript", query: "JavaScript", target: "developer.mozilla.org", url: "https://developer.mozilla.org/en/JavaScript"},
+    {name: "JS", query: "JS", target: "developer.mozilla.org", url: "https://developer.mozilla.org/en/JavaScript"},
+    {name: "Learn JavaScript", query: "Learn%20JavaScript", target: "developer.mozilla.org", url: "https://developer.mozilla.org/en/JavaScript/Guide"},
+    {name: "JS Reference", query: "JS%20Reference", target: "developer.mozilla.org", url: "https://developer.mozilla.org/en/JavaScript"},
+    {name: "Learn JS", query: "Learn%20JS", target: "developer.mozilla.org", url: "https://developer.mozilla.org/en/JavaScript"},
+    {name: "JS Array", query: "JS%20Array", target: "developer.mozilla.org", url: "https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array"},
+    {name: "JS String", query: "JS%20String", target: "developer.mozilla.org", url: "https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/String"},
+    {name: "JS Number", query: "JS%20Number", target: "developer.mozilla.org", url: "https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Number"},
+    {name: "JS RegExp", query: "JS%20RegExp", target: "developer.mozilla.org", url: "https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/RegExp"},
+    {name: "JS Function", query: "JS%20Function", target: "developer.mozilla.org", url: "https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function"},
+    {name: "JS Tutorial", query: "JS%20Tutorial", target: "developer.mozilla.org", url: "https://developer.mozilla.org/en/JavaScript/Guide"},
+    {name: "JS Documentation", query: "JS%20Documentation", target: "developer.mozilla.org", url: "https://developer.mozilla.org/en/JavaScript"}
 ];
 
 var is_first = 0;
 var active_series = [];
 var resetting = false;
+
+function find_url_for_label(label) {
+  var found = null;
+  target_queries.forEach(function(elem, idx) {
+    if (elem.name === label) {
+      found = elem.url;
+    }
+  });
+  return found;
+}
 
 
 var target_url = "/ajax/services/search/web?v=1.0&q={QUERY}&start={PAGE}"
@@ -183,7 +193,7 @@ app.get("/", function (req, res) {
   var current_rankings = [];
   for (var idx in active_series)   {
     rankings = active_series[idx].data;
-    current_rankings.push({ label: active_series[idx].label, ranking: rankings[rankings.length-1][1] });
+    current_rankings.push({ label: active_series[idx].label, ranking: rankings[rankings.length-1][1], url: find_url_for_label(active_series[idx].label) });
   }
   res.render("index.ejs", { locals: {
     data: JSON.stringify(active_series),
