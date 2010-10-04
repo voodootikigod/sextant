@@ -58,7 +58,7 @@ var options = {
          minTickSize: [1, "day"]
        },
        yaxis: {
-           transform: function (v) { return Math.log(v); },
+           transform: function (v) { return 1/Math.log(v); },
        }
    };
  
