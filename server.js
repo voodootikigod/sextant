@@ -26,6 +26,8 @@ app.set('views', __dirname + '/views');
 
 
 var target_queries = [
+    {name: "JavaScript", query: "JavaScript", target: "developer.mozilla.org"},
+    {name: "JS", query: "JS", target: "developer.mozilla.org"},
     {name: "Learn JavaScript", query: "Learn%20JavaScript", target: "developer.mozilla.org"},
     {name: "JS Reference", query: "JS%20Reference", target: "developer.mozilla.org"},
     {name: "Learn JS", query: "Learn%20JS", target: "developer.mozilla.org"},

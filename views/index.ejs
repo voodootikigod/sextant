@@ -38,13 +38,8 @@
 </footer>
 </div> 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> 
-<script src="./ext/flot/jquery.flot.js"></script> 
+<script src="http://static.jsconf.us/ext/flot/jquery.flot.js"></script> 
 <script> 
- 
-function getDate(days) {
-  return (new Date()).getTime() - days * 3600 * 24 * 1000;
-}
- 
 var series = <%- data %>;
 var options = {
        series: {
