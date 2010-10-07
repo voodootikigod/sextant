@@ -121,7 +121,7 @@ function reset_active_series() {
         var current = elem.value
         if (current._id.split(":")[0] != previous_target) {
           if (previous_target) {
-            if (curry_data[curry_data.length-1] == 0) { is_first += 1; }
+            if (curry_data[curry_data.length-1] == 1) { is_first += 1; }
             active_series.push({
               label: curry_label,
               data: JSON.parse(JSON.stringify(curry_data))
@@ -140,7 +140,7 @@ function reset_active_series() {
       });
     
       if (previous_target) {
-        if (curry_data[curry_data.length-1][1] == 0) { is_first += 1; }
+        if (curry_data[curry_data.length-1][1] == 1) { is_first += 1; }
         active_series.push({
           label: curry_label,
           data: curry_data
