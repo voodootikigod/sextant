@@ -107,7 +107,7 @@ function seek (target_url, page, is_found, callback) {
 function pad(n){return n<10 ? '0'+n : n}
 function keyify(i) {  return i.name.toLowerCase().replace(/[^a-z0-9]/g,""); }
 function reset_active_series() {
-    if_first = 0;
+    is_first = 0;
     resetting = true;
     active_series.length = 0;  
     db.view("ordering", "byid", {}, function (err, r) {
