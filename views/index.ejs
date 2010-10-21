@@ -113,8 +113,7 @@ $(function () {
 
   $.plot($("#arewefirstyet"), series, options);
   $("#arewefirstyet").bind("plothover", function (event, pos, item) {
-      console.log("hover");
-      console.log(arguments[2]);
+      
       if (item) {
           if (previousPoint != item.datapoint) {
               previousPoint = item.datapoint;
