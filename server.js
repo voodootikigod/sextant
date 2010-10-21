@@ -101,7 +101,7 @@ function seek (target_url, page, is_found, callback) {
                     seek(target_url, page+1, is_found, callback);
                 }
             } else {
-                sys.p("Failure on "+paged_target_url);
+                sys.puts("Failure on "+paged_target_url);
             }
         });
 	
@@ -127,22 +127,20 @@ function reset_active_series() {
                 var current = elem.value
                 if (current._id.split(":")[0] != previous_target) {
                     if (previous_target) {
-                        if (curry_data[curry_data.length-1][1] == 1) { is_first += 1; }
-                        active_series.push({
-                            label: curry_label,
-                            data: JSON.parse(JSON.stringify(curry_data))
-                        })
+                      if (curry_data[curry_data.length-1][1] == 1) { is_first += 1; }
+                      active_series.push({
+                          label: curry_label,
+                          data: JSON.parse(JSON.stringify(curry_data))
+                      })
                     }
                     current_target_count = 0;
                     curry_data.length = 0;
                     previous_target = current._id.split(":")[0];
                     curry_label = current.target;
                 }
-                if (current_target_count < 20) {
-                    var d = (new Date(Date.UTC(parseInt(current.date.slice(0,4), 10), parseInt(current.date.slice(4,6), 10), parseInt(current.date.slice(6,8), 10), 0, 0, 0, 0))).getTime();
-                    curry_data.push([d, current.placement]);
-                    current_target_count += 1;
-                }
+                var d = (new Date(Date.UTC(parseInt(current.date.slice(0,4), 10), parseInt(current.date.slice(4,6), 10), parseInt(current.date.slice(6,8), 10), 0, 0, 0, 0))).getTime();
+                curry_data.push([d, current.placement]);
+                current_target_count += 1;
             });
             
             if (previous_target) {
