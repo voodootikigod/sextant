@@ -9,6 +9,8 @@ cport = process.env.COUCHDB_PORT || 5984;
 chost = process.env.COUCHDB_HOST || "localhost";
 cuser = process.env.COUCHDB_USER;
 cpass = process.env.COUCHDB_PASSWORD;
+
+debug = process.env.DEBUG;
 // sys.puts("Connecting to "+cuser+"|"+cpass+"|"+chost+"|"+cport);
 
 if (cuser) {
@@ -68,6 +70,8 @@ function seek (target_url, page, is_found, callback) {
                                      "Host": "ajax.googleapis.com",
                                      "User-Agent": ua
                                  });
+    if (debug)
+      console.log("Requesting "+paged_target_url);
     request.end();
     request.on("response", function (response) {
         var body = "";
@@ -162,7 +166,9 @@ function query_placement() {
             return (function (found_index) {
                 var timestamp = ""+nao.getFullYear()+pad(nao.getUTCMonth())+pad(nao.getUTCDate());
                 db.saveDoc(keyify(t)+":"+timestamp, {"target": t.name, "query": t.query, "date": timestamp, "placement": found_index}, function (err, doc) {
-                    if (err) { throw new Error(JSON.stringify(err)) }
+                    if (err) { 
+                      console.log(JSON.stringify(err)) 
+                    }
                 });
                 idx += 1;
             });
