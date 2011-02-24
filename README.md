@@ -10,3 +10,11 @@ If you know what this is, then you know what this is. Unfortunately I can't give
     Drink up me 'earties, yo ho.
 
 [Can the seas be tamed?](http://arewefirstyet.com)
+
+Genesis of this project: [community.js](http://jsconf.eu/2010/communityjs_by_chris_williams_1.html)
+
+One note, you need to use the power of cron, something to the effect of:
+
+    5 1 * * * curl http://127.0.0.1/seek > /dev/null
+
+Good travels to you!
