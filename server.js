@@ -1,24 +1,72 @@
+// npm install express
+// To use, be sure to add a crontab entry that every 24 hours pings the /seek path of the webserver. This will force the aggregation of new results per day.
+
 var sys = require("sys");
 var connect = require("connect");
 var express = require("express");
 var fs = require("fs");
 var http = require("http");
 var target_queries = require("./targets");
-
-cport = process.env.COUCHDB_PORT || 5984;
-chost = process.env.COUCHDB_HOST || "localhost";
-cuser = process.env.COUCHDB_USER;
-cpass = process.env.COUCHDB_PASSWORD;
+var config = require("./config");
 
 debug = process.env.DEBUG;
-// sys.puts("Connecting to "+cuser+"|"+cpass+"|"+chost+"|"+cport);
 
-if (cuser) {
-    var couchdb = require("couchdb").createClient(cport, chost, cuser, cpass);
-} else {
-    var couchdb = require("couchdb").createClient(cport, chost);
+
+function couchdb_request(obj) {
+  if (!obj) { obj = {}; }
+  obj.port = config.couchdb.port;
+  obj.host = config.couchdb.host;
+  var pathRegex = new RegExp("^\/"+config.couchdb.database+"\/")
+  if (obj.path == null || obj.path == undefined) { obj.path = ""; }
+  if (!pathRegex.test(obj.path))
+    obj.path = ("/" + config.couchdb.database + "/" + obj.path).replace("//", "/"); //handle duplicate slashes gracefully
+  if (!obj.headers) 
+    obj.headers = {};
+  if (!obj.headers['Content-Type']) 
+    obj.headers['Content-Type'] = 'application/json'; 
+  if (config.couchdb.user) 
+    obj.headers["Authorization"] = 'Basic ' + new Buffer(config.couchdb.user + ':' + config.couchdb.password).toString('base64');
+  if (!obj.method)
+    obj.method = 'GET';
+  return obj;
 }
-var db = couchdb.db("arewefirstyet");
+
+
+// Verify and if necessary configure CouchDB Connection
+var sanity = http.get(couchdb_request(), function(res) {
+  if (res.statusCode != 200) {
+    sys.puts("Could not connect to CouchDB with information from config.js.");
+    process.exit(-1);
+  } else {
+    var design_doc = {
+      "_id": "_design/ordering",
+      "views": {
+       "byid": {
+        "map" : "function(doc) {    if (doc.target) {      emit(doc._id, doc);    }    }"
+       }
+      }
+    }
+    var ddoc_req = http.request(couchdb_request({ method: "PUT", path: "_design/ordering", headers: {'Content-Type': 'application/json'} }), function (response) {
+      if (response.statusCode == 201) {
+        console.log("Added design document to "+config.couchdb.database);
+      } else if (response.statusCode == 409) {
+        // design document exists, do not update/change.
+      } else {
+        console.log("Design document could not be added and is not present, sextant will not work.");
+        process.exit(-1);
+      }
+    });
+    ddoc_req.write(JSON.stringify(design_doc));
+    ddoc_req.end();
+  }
+});
+sanity.end();
+
+
+
+
+
+// Load up the server.
 
 var pub = __dirname + '/public';
 var app = express.createServer(
@@ -26,9 +74,6 @@ var app = express.createServer(
 );
 
 app.set('views', __dirname + '/views');
-
-
-
 var is_first = 0;
 var active_series = [];
 var resetting = false;
@@ -44,36 +89,23 @@ function find_url_for_label(label) {
 }
 
 
-var target_url = "/ajax/services/search/web?v=1.0&q={QUERY}&start={PAGE}"
-var MAX_PAGES = 10;
-var MAX_SPIN = 50;
+var target_url = "/ajax/services/search/web?v=1.0&q={QUERY}&start={PAGE}";
 
-var user_agents = [
-    "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/525.13 (KHTML, like Gecko) Chrome/0.A.B.C Safari/525.13",
-    "Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US) AppleWebKit/533.17.8 (KHTML, like Gecko) Version/5.0.1 Safari/533.17.8",
-    "Mozilla/5.0 (Windows; U; Windows NT 6.1; ja-JP) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16",
-    "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/7.0.540.0 Safari/534.10",
-    "Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US) AppleWebKit/534.10 (KHTML, like Gecko) Chrome/7.0.540.0 Safari/534.10",
-    "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.9 (KHTML, like Gecko) Chrome/7.0.531.0 Safari/534.9",
-    "Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US) AppleWebKit/534.4 (KHTML, like Gecko) Chrome/6.0.481.0 Safari/534.4",
-    "Mozilla/5.0 (X11; U; Linux i686; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.462.0 Safari/534.3"
-];
+
 
 
 function seek (target_url, page, is_found, callback) {
-    var ua = user_agents[Math.floor(Math.random()*user_agents.length)];
+  var uas =config.user_agents;
+    var ua = uas[Math.floor(Math.random()*uas.length)];
     var paged_target_url = target_url.replace("{PAGE}", page);
-    var google = http.createClient(80, "ajax.googleapis.com");
-    var request = google.request('GET', 
-                                 paged_target_url,
-                                 {
-                                     "Host": "ajax.googleapis.com",
-                                     "User-Agent": ua
-                                 });
     if (debug)
       console.log("Requesting "+paged_target_url);
-    request.end();
-    request.on("response", function (response) {
+
+    var request = http.get({ 
+      host: "ajax.googleapis.com", 
+      path: paged_target_url,
+      headers: { "User-Agent": ua }
+    }, function (response) {
         var body = "";
         response.on("data", function(chunker) {
             body += chunker;
@@ -86,15 +118,15 @@ function seek (target_url, page, is_found, callback) {
                 juicybits.forEach(function(bit, bitcount) {
                     if (is_found(bit.url)) {
                         found_index = page*4 + bitcount;
-                        // urls.push({url: bit.url, name: bit.titleNoFormatting})
+                        // urls.push({url: bit.url, name: bit.titleNoFormatting})  -- removed due to TOS concern (no indexing)
                     }
                     if (found_index == -1) {
-                        // urls.push({url: bit.url, name: bit.titleNoFormatting})
+                        // urls.push({url: bit.url, name: bit.titleNoFormatting})  -- removed due to TOS concern (no indexing)
                     }
                 });
                 
-                if (page == MAX_SPIN) {
-                    callback(MAX_SPIN*4);
+                if (page == config.max_spin) {
+                    callback(config.max_spin*4);
                 } else if (found_index >= 0)
                     callback(found_index+1);
                 else {
@@ -104,7 +136,7 @@ function seek (target_url, page, is_found, callback) {
                 sys.puts("Failure on "+paged_target_url);
             }
         });
-	
+ 
     });
 }
 
@@ -114,16 +146,23 @@ function reset_active_series() {
     is_first = 0;
     resetting = true;
     active_series.length = 0;  
-    db.view("ordering", "byid", {}, function (err, r) {
-        if (err) { 
-            for (var e in err) { sys.puts(""+e+": "+err[e]) }
-            resetting = false;
-        } else {
+    
+    var view = http.get(couchdb_request({ path: "_design/ordering/_view/byid", headers: {'Content-Type': 'application/json'} }), function (response) {
+      if (response.statusCode != 200) {
+        resetting = false;
+        console.log("Did not receive data from design document");
+      } else {
+        var body = "";
+        response.on("data", function(chunker) {
+            body += chunker;
+        });
+        response.on("end", function() { 
+            var data = JSON.parse(body);
             var current_target_count = 0;
             var previous_target = null;
             var curry_data = [];
             var curry_label = "";
-            r.rows.forEach(function (elem, idx) {
+            data.rows.forEach(function (elem, idx) {
                 var current = elem.value
                 if (current._id.split(":")[0] != previous_target) {
                     if (previous_target) {
@@ -151,8 +190,10 @@ function reset_active_series() {
                 })
             }
             resetting = false;
-        }
-    })
+        });
+      }
+    });
+    view.end();
 }
 
 function query_placement() {
@@ -163,11 +204,15 @@ function query_placement() {
         var callback = (function (t) {
             return (function (found_index) {
                 var timestamp = ""+nao.getFullYear()+pad(nao.getUTCMonth())+pad(nao.getUTCDate());
-                db.saveDoc(keyify(t)+":"+timestamp, {"target": t.name, "query": t.query, "date": timestamp, "placement": found_index}, function (err, doc) {
-                    if (err) { 
-                      console.log(JSON.stringify(err)) 
-                    }
-                });
+                
+                var doc = http.request(couchdb_request({path: keyify(t)+":"+timestamp, method: "PUT"}), function (res) {
+                  if (res.statusCode != 200 || res.statusCode != 201) {
+                    console.log("Could not add doc:");
+                    console.log(doc);
+                  }// sys.p(res);
+                })
+                doc.write(JSON.stringify({"target": t.name, "query": t.query, "date": timestamp, "placement": found_index}));
+                doc.end();
                 idx += 1;
             });
         })(target);
@@ -208,5 +253,5 @@ app.get("/", function (req, res) {
     }});
 })
 
-
-app.listen(process.env.NODE_PORT || 80);
+// use env port value if present else config port
+app.listen(process.env.NODE_PORT || config.port);
