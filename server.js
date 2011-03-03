@@ -104,7 +104,7 @@ function seek (target_url, page, is_found, callback) {
     var request = http.get({ 
       host: "ajax.googleapis.com", 
       path: paged_target_url,
-      headers: { "User-Agent": ua }
+      headers: { "User-Agent": ua, "Host": "ajax.googleapis.com" }
     }, function (response) {
         var body = "";
         response.on("data", function(chunker) {
@@ -209,6 +209,7 @@ function query_placement() {
                   if (res.statusCode != 200 || res.statusCode != 201) {
                     console.log("Could not add doc:");
                     console.log(doc);
+                    console.log(res)
                   }// sys.p(res);
                 })
                 doc.write(JSON.stringify({"target": t.name, "query": t.query, "date": timestamp, "placement": found_index}));
