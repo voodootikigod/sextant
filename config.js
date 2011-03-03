@@ -22,4 +22,4 @@ module.exports.user_agents = [
 module.exports.port = 8080;
 
 module.exports.max_pages = 10;
-module.exports.max_spin = 50;
+module.exports.max_spin = 5;

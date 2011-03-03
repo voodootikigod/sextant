@@ -206,10 +206,10 @@ function query_placement() {
                 var timestamp = ""+nao.getFullYear()+pad(nao.getUTCMonth())+pad(nao.getUTCDate());
                 
                 var doc = http.request(couchdb_request({path: keyify(t)+":"+timestamp, method: "PUT"}), function (res) {
-                  if (res.statusCode != 200 || res.statusCode != 201) {
+                  if (res.statusCode != 200 && res.statusCode != 201) {
                     console.log("Could not add doc:");
-                    console.log(doc);
-                    console.log(res)
+                    console.log(t.name);
+                    console.log(res.statusCode)
                   }// sys.p(res);
                 })
                 doc.write(JSON.stringify({"target": t.name, "query": t.query, "date": timestamp, "placement": found_index}));
